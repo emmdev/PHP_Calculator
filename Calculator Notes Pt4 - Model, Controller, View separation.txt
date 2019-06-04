@@ -1,0 +1,114 @@
+
+calculator_05.php - define Model function place-holders
+-----------------
+
+Up until now, we have separated View (HTML) from Controller (PHP), with the controller code in the top half of our file, and the view code in the bottom half.
+
+Now, that we have just introduced the "History of Calculations", we technically have a Model (based on the PHP Session variable).  So we can actually separate out the Model bits of PHP from the Controller bits of PHP.  And this will give us similar benefits as with separating View (HTML) from Controller (PHP), especially as our app grows in complexity!
+
+The resulting sections will be:
+View (HTML), Controller (PHP), Model (PHP)
+
+
+The question, now, is: which parts of the PHP are "Controller", and which parts of the PHP are "Model"??
+
+
+In short, the Model consists of any "elementry database operation", organized into functions that we can call from the Controller.  For now, our model consists only 1 table, for "History of Calculations."
+
+Also, for now, we are using PHP Sessions as our "database technology", but the model is organized the same way if you were to use a more advanced database technology such as MySQL (which we will switch to, later).
+
+To help clarify all this, try and follow the next few versions of this Calculator App.
+
+
+
+First, I declare the Model functions at the top of my PHP, as you can see in calculator_05.php:
+
+function CalCDB_Connect() {
+    
+}
+
+function HistoryOfCalculations_AddLine() {
+    
+}
+
+function HistoryOfCalculations_GetAll() {
+    
+}
+
+function HistoryOfCalculations_ClearAll() {
+    
+}
+
+function CalCDB_Close() {
+    
+}
+
+
+calculator_05b.php - move Model code into the functions
+------------------
+
+Next, one function at a time, carefully, with testing at each step ....
+
+I move each "elementry model operation" from the Controller section,
+into the corresponding function definition in the Model section... and
+the call the model function from the controller.
+
+So, for example, for the operation of adding a line to the History of Calculations, I moved the line:
+    array_push($_SESSION["HistoryOfCalculations"], $calculation_text);
+
+into the function:
+    function HistoryOfCalculations_AddLine($line) {
+        array_push($_SESSION["HistoryOfCalculations"], $line);
+    }
+
+and then call the function from where the line originally was:
+    HistoryOfCalculations_AddLine($calculation_text);
+
+and, note that I needed to define and pass an argument to the function i.e. the $line to add to the history.
+In other cases, you may need to define and return a return value from the function.
+
+
+Do this for each "elementry model operation" function that I defined, one step at a time,
+testing that the app still works at each step.  The result should look something like caculator_05b.php
+
+
+
+calculator_05c/ - separate the Model section into its own file
+---------------
+
+We can further *formalize* the separation of the Model from the rest of the app by moving it into it's own file, calculator_model.php, and then including it from the main calculator.php
+
+The result is stored in the folder, "calculator_05c/".  Note, because our app has multiple files, I have moved to storing versions of the app in a folder.
+
+
+calculator_05d/ - separate the Controller section into its own file
+---------------
+
+Just we did for the Model, we can also formalize the separation of View and Controller by moving the Controller into a separate file, calculator_controller.php, and including it from the main file, calculator.php.  The main calculator.php file is now essentially the View.
+
+The user only has to load the URL for calculator.php in their browser, and they never have to directly see "calculator_controller.php" and "calculator_model.php"
+
+Also note, how the View (calculator.php) includes the Controller (calculator_controller.php), and the Controller includes the Model (calculator_model.php)...  I did it this way to formalize how the Controller really sits in between the View (HTML) and the Model (database):
+
+View (what the user sees)  <-->  Controller (the core logic of your page)  <-->  Model (long term storage)
+
+
+The Controller is like the "middle person" between View and Model.
+
+
+An analogy, from a Meat Shop:
+-----------------------------
+
+At the front of the shop, you have customer service people.  They are friendly and easy to work with.
+(This is like the View or user interface)
+
+They send orders to the butchers, in the middle of the shop, who make specific cuts of meat.
+(This is like the Controller or application logic)
+
+The butchers get large slabs of unprocessed meat from the back freezer, which is long-term storage/inventory of the meat shop.
+(This is like the Model, or long-term storage / database.)
+
+
+
+
+Now that we have nicely separated Model / Controller / View, we are finally, finally ready to introduce MySQL to our calculator app....

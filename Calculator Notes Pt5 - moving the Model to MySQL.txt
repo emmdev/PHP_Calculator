@@ -1,0 +1,326 @@
+
+The PHP session variable seems to be working for us, so why move to a full-fledged database server like MySQL?
+
+Try the following experiment #1:
+1. Do some calculations to create some history in your calculator app.
+2. Close your browser completely
+3. Open your browser again and load your calculator app...
+	Are the prior calculations history still there?
+
+Try the following experiment #2:
+1. Do some calculations to create some history in your calculator app.
+2. Open your calculator app in a different browser... OR in a Private Tab ("Incognito mode" on Chrome)... OR even on a different computer or mobile device (by using the hosting computer's IP address)
+	Are the prior calculations history still there?
+
+
+The first experiment shows that the PHP session cannot store data in the long-term, beyond a browsing session.
+
+The second experiment shows that the PHP session stores data that is confined to a single browser.  If you wanted to use the same app on a different browser (say, on a different device), the session data doesn't transer over between browsers.  Or devices, for that matter.
+
+This last point also means, if you want to have Social features to your app (like a chat room or a like button, or a view count), session data again won't work, because different users each have their own device / browser.
+
+
+So, we need to connect PHP to a database server, such as MySQL, to do have features that a) have permanent storage; and/or  b) can be accessed across different browsers / devices; and/or c) involve interaction between different users of your app.
+
+So let's move our model to MySQL!  It will allow the History of Calculations to be permanent and sharable, no matter which device or browser -- and this will be the lead in to a Chat App.
+
+
+calculator_06/ - Create a MySQL Database
+--------------
+
+We need to create our database before we can use it.
+
+This is a task that needs to be done once at the start of deploying our calculator app, and never again during normal usage of the calculator app, so we will do it from a separate PHP file called setup.php
+
+1. Copy the code from https://www.w3schools.com/php/php_mysql_create.asp into a new file, setup.php
+2. Change your MySQL server login info if necessary.  It will be based on what you choose when you installed MySQL on your computer.  I ended up using:
+	$servername = "localhost";
+	$username = "root";
+	$password = "";
+
+Note! Using "root" with a blank password is super insecure.  Choose a user other than root, with a better password in the final deployment of your app.
+
+3. Change the database name to calc_db
+
+4. Run the setup.php by loading it in your browser.  Resolve any errors until it works!  Note, that every time you re-test setup.php, you will need to delete ("DROP") the database.  Use PhpMyAdmin for this: http://localhost/phpmyadmin/
+
+
+calculator_06b/ - Create a single table in our MySQL Database
+---------------
+
+Next, we need to create a single table to store History of Calculations.
+
+1. Paste the code from https://www.w3schools.com/php/php_mysql_create_table.asp for creating a table, to the very end of setup.php
+2. Change the $servername, $username, $password as approprate, like we did in the last step.
+3. Change $dbname to "calc_db":
+	$dbname = "calc_db";
+
+4. Change the SQL string to create a table to the following:
+	$sql = "CREATE TABLE history_of_calculations (
+	    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
+	    calculation_text VARCHAR(30) NOT NULL
+	)";
+
+This creates a table called history_of_calculations with 2 columns: id, and calculation_text.  id is an integer that auto-increments, and calculation_text can store up to 30 characters.
+
+5. Use PhpMyAdmin to DROP the database, and then run your setup.php by loading it in your browser.
+Hopefully everything is successful, including creating the table:
+	"Table history_of_calculations created successfully"
+
+6. Debug as necessary before moving on.  Note, that every time you re-test setup.php, you will need to delete ("DROP") the database.  Use PhpMyAdmin for this: http://localhost/phpmyadmin/
+
+
+
+calculator_06c/ - Clean up our Setup script
+---------------
+
+All of the work we just did in setup.php, we could have done using the graphical interface of PhpMyAdmin.  So why did we bother making setup.php?
+
+Because now the steps to setup our database are completely automated & reproducable.  We just have to run setup.php!
+
+If we do it manually using PhpMyAdmin, it works, but... it's prone to human error.
+
+
+As a final step, let's make the output of setup.php look more readable by echo'ing horizontal rule lines between each phase of the setup:
+
+
+
+
+
+calculator_07/ - Moving to MySQL, with Unit Testing!!
+--------------
+
+Now that we have our MySQL database (calc_db) and table (history_of_calculations) setup, we can now migrate our calculator_model.php to MySQL.
+
+In theory, because we already cleanly separated out the Model, we only need to change calculator_model.php;
+we don't have to change calculator_controller.php or calculator.php.
+
+This is quite nice... you can imagine the benefits if this were a very feature rich page, where you can avoid the nightmare of doing surgery all over your controller just because something in your model changed...
+This shows one of many benefits of having followed the Model-Controller-View pattern.
+
+Here's a dilemma:  there is a lot to change in switching from PHP sessions to MySQL... how can we do it step by step, fixing errors at each step (which is the smart way to do things)??  As soon as we change one model function, it kind of breaks the whole app... and then you just have a flood of errors, and can't debug the change you just made...
+
+Answer: by testing the model function we are working on from a place outside of the main calculator app, with the sole purpose of testing that one function.  This is called "Unit Testing".  In particular, I decided to call the functions from the bottom of calculator_model.php, starting with connecting and closing a connection:
+
+...
+
+CalcDB_Connect();
+
+CalcDB_Close();
+
+Now, just run calculator_model.php in your browser directly, and if there are any errors, it will print them to the browser!
+If it's blank, you were able to connect the MySQL server, and then close the connection.
+
+You can think of this as us building a temporary little Controller just to test our new MySQL model functions, so that we don't have disturb our already working calculator_controller.php.  And furthermore, if our new MySQL model function has bugs (because... it's new!), it's less confusing to isolate the problem from such a little simple Controller, in comparison to the already pretty complicated calculator_controller.php.
+
+
+
+calculator_07b/ - an error!
+---------------
+
+I got an error!  It turns out, the variable $conn, which stores a reference to the MySQL connection created in CalcDB_Connect(), is needed again by CalcDB_Close() ... and remember, each function is its own sandbox, so variables inside a function are by default only local to that function.
+
+An easy solution for passing this variable around is to make it global, by declaring the variable $conn at the top of each function with the "global" keyword in front:
+
+	function CalcDB_Connect() {
+	    global $conn;
+	    
+	    ...
+	}
+
+
+	function CalcDB_Close() {
+	    global $conn;
+	    
+	    ...
+	}
+
+Now, when I run calculator_model.php in my browser, it works!  i.e. the browser shows a blank page
+
+
+You can see how useful and *powerful* this technique of Unit Testing is... it allows us to make just a small part of our app work, the MySQL model in this case, without getting bogged down or creating bugs in the rest of the app.
+
+
+
+calculator_07c/ - HistoryOfCalculations_AddLine() to MySQL
+---------------
+
+Using the same approach, try switching to MySQL another model function, say, HistoryOfCalculations_AddLine().
+
+To do this, add a call to HistoryOfCalculations_AddLine() again at the bottom of calculator_model.php:
+
+	CalcDB_Connect();
+
+	HistoryOfCalculations_AddLine("5 x 2 = 10");
+
+	CalcDB_Close();
+
+Note:
+- I put it in the middle, because it needs to happen after connecting to MySQL server, but before closing the connection.
+- This function needs an argument to really test if it works, so I hardcoded something realistic, "5 x 2 = 10".
+
+And then to actually implement the MySQL version of this function, you can copy and paste the example from https://www.w3schools.com/php/php_mysql_insert.asp and change the table name, column, and value as appropriate:
+
+	function HistoryOfCalculations_AddLine($line) {
+	    $sql = "INSERT INTO history_of_calculations (calculation_text)
+	    VALUES ('$line')";
+
+	    if ($conn->query($sql) === TRUE) {
+	        echo "New record created successfully";
+	    } else {
+	        echo "Error: " . $sql . "<br>" . $conn->error;
+	    }
+	}
+
+Test it - does it work?  Oh! ...We need global $conn at the top of the function again.
+Finally, once it's working, I clean it up so that it only echo's output when there is an error, and doesn't clutter the app output otherwise.
+
+
+
+calculator_07d/ - HistoryOfCalculations_GetAll() to MySQL
+---------------
+
+Using the same approach, try switching to MySQL another model function, say, HistoryOfCalculations_GetAll().
+
+This time, in anticipation of the fact that it is supposed to return all the history, as an array, I use PHP's print_r() function to display the output to help me know if it's working.  I do this even before work on the actual function:
+
+echo "<pre>";
+print_r(HistoryOfCalculations_GetAll());
+echo "</pre>";
+
+(I also wrapped the output in <pre></pre>, which preserve's print_r()'s whitespace formatting.)
+
+Now, refer to https://www.w3schools.com/php/php_mysql_select.asp and change the table name, column name, etc as appropriate, and declare the global variable $conn within your function:
+
+	function HistoryOfCalculations_GetAll() {
+	    global $conn;
+    
+	    $sql = "SELECT id, calculation_text FROM history_of_calculations";
+	    $result = $conn->query($sql);
+
+	    if ($result->num_rows > 0) {
+	        // output data of each row
+	        while($row = $result->fetch_assoc()) {
+	            echo "id: " . $row["id"]. " - Text: " . $row["calculation_text"] . "<br>";
+	        }
+	    } else {
+	        echo "0 results";
+	    }
+	}
+
+
+
+calculator_07e/ - HistoryOfCalculations_GetAll() - return the array
+---------------
+
+Once this is working, it's not quite complete.  We need to *return* the history array, instead of echo'ing it.  A simple way is to declare an empty array, do an array_push() as you loop, and then return the final array:
+
+
+	function HistoryOfCalculations_GetAll() {
+	    global $conn;
+    
+	    $sql = "SELECT id, calculation_text FROM history_of_calculations";
+	    $result = $conn->query($sql);
+
+	    $final_array = array();
+	    if ($result->num_rows > 0) {
+	        // output data of each row
+	        while($row = $result->fetch_assoc()) {
+	            array_push($final_array, $row["calculation_text"]);
+	        }
+	    } else {
+	        echo "0 results";
+	    }
+    
+	    return $final_array;
+	}
+
+
+
+calculator_07f/ - clean up HistoryOfCalculations_GetAll()
+---------------
+
+Finally, we can clean it up so that it's not echo'ing stuff to the screen.  Also, the if statement is in fact redundant, if there are 0 rows, the while loop creates an empty array:
+
+	function HistoryOfCalculations_GetAll() {
+	    global $conn;
+    
+	    $sql = "SELECT id, calculation_text FROM history_of_calculations";
+	    $result = $conn->query($sql);
+
+	    $final_array = array();
+    
+	    while($row = $result->fetch_assoc()) {
+	        array_push($final_array, $row["calculation_text"]);
+	    }
+    
+	    return $final_array;
+	}
+
+
+You can test this specific case of "does it handle an empty array correctly", by manually clearing all the history using PhpMyAdmin, and *also* commenting out the HistoryOfCalculations_AddLine() call:
+
+	CalcDB_Connect();
+
+	//HistoryOfCalculations_AddLine("5 x 2 = 10");
+
+	echo "<pre>";
+	print_r(HistoryOfCalculations_GetAll());
+	echo "</pre>";
+
+	CalcDB_Close();
+
+
+
+calculator_07g/ - HistoryOfCalculations_ClearAll() to MySQL
+---------------
+
+Next, we use the same approach to move HistoryOfCalculations_ClearAll() to MySQL.  It turns out, that the SQL to clear all the rows of a table is TRUNCATE:
+
+$sql = "TRUNCATE TABLE history_of_calculations";
+
+
+
+calculator_07h/ - the MySQL moment of truth...
+---------------
+
+Once all your model functions are moved to MySQL, and are passing your unit tests, comment your unit tests (your "temperary testing controller", and try it from your full calculator app, by the loading calculator.php from your browser!
+
+The moment of truth.... does it work?
+
+
+	Warning: mysqli::query(): Couldn't fetch mysqli in C:\xampp\htdocs\calculator2\calculator_07h\calculator_model.php on line 34
+
+
+Huh, line 34 of calculator_model.php is in the HistoryOfCalculations_GetAll() function, which our calculator app calls from... the view, calculator.php, line 38:
+
+        <?php
+        foreach(HistoryOfCalculations_GetAll() as $line) {
+            echo "<li>$line</li>";
+        }
+        ?>
+
+
+
+calculator_07i/
+---------------
+
+It turns out that the problem is that, the MySQL connection is closed at the end of our controller, which all happens *before* the view code gets run.  So the call HistoryOfCalculations_GetAll() on line 38 of calculator.php runs on an empty connection.
+
+A good solution to this problem is to call HistoryOfCalculations_GetAll() from *inside* the controller, and store the result in a variable that can be then read by our view.  I've done this in calculator_07i/
+
+By the way, remember that the Controller is supposed to be the "middle-person" between View and Model:
+
+View <-> Controller <-> Model
+
+So, our problem could have been averted if we had followed this religiously, by not calling a model function (e.g. HistoryOfCalculations_GetAll) directly from our View, but having Controller call it and then pass the result to View!
+
+
+So there you have it.  The Model-Controller-View separation allowed us to do an extensive model change (like migrating from PHP Sessions to MySQL) with almost no changes to the rest of our app... and even the once change to our app only happened because we technically didn't perfectly follow the M-C-V separation!
+
+
+
+Now that we have everything working with MySQL, we have all the benefits of a database - your app can store data that it can use even on different browsers, devices, and/or users.  We are ready our chat app!!
+
+well, almost.......
+

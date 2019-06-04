@@ -1,0 +1,115 @@
+calculator_03c.php - Clean up comments
+------------------
+
+Before continuing, I will clean up / shorten the comments.  Hopefully by now, the code mostly explains itself.  If not, you may need to rename some variables to be more expressive!
+
+For example, I made a variable
+	$form_has_been_submitted = $_SERVER['REQUEST_METHOD'] == 'POST';
+instead of just using
+	$_SERVER['REQUEST_METHOD'] == 'POST'
+which kind of hides my intention.
+
+
+Why rely less on comments, and more on code to document what's going on?
+
+It's subjective, but, in my opinion:
+
+1. Comments have a tendency to get outdated if you change the code, and forget the also change the comments.  So it's more to maintain, and if you forget, can just confuse you when the comment says something different than what the code does.
+
+2. If the code is written in a cleaner, and more self-explanatory way, then comments can be redundant, and just adding clutter, as well as more to maintain (point #1).
+
+It's not either or, in practice you can get away with *less* comments if your variables and functions are expressively named, and the code is well-organized.
+
+
+
+
+
+calculator_04.php - History of Calculations
+-----------------
+
+So, now we want to have a History of Calculations, e.g.
+2 + 3 = 5
+2 x 3 = 6
+20 - 36 = 16
+
+1. The easy part is to determine the text to represent a calculation.  Do that first (and echo it to verify).
+
+	-> Then compare to what I did, calculator_04.php
+
+
+What is more tricky is, to store it and the text for all previous calculations.
+
+2. First, you need an array.
+	https://www.w3schools.com/php/php_arrays.asp
+
+Carefully try their examples (in a separate project), before you continue.  And then, practice pushing to the end of an array:
+	https://www.w3schools.com/php/func_array_push.asp
+
+
+3. Second, you have the problem that variables get erased and re-defined every new page load, and a form submission is no different.  So, we introduce a special variable that lasts even if you refresh (or submit a form), a PHP Session Variable:
+	https://www.w3schools.com/php/php_sessions.asp
+
+Carefully try their examples (in a separate project).
+
+
+
+calculator_04b.php - History of Calculations pt2
+------------------
+
+4. Finally, we can combine #2 and #3 above together to make a History of Calculations
+
+First, we will store our array of calculation texts in $_SESSION (which is, itself, an array):
+	$_SESSION["HistoryOfCalculations"] = array();
+
+This initializes the history an empty array.  We can now add the latest calculation using array_push:
+
+	array_push($_SESSION["HistoryOfCalculations"], $calculation_text);
+
+Finally, print back the history at the bottom in your HTML/View:
+
+	<pre>
+	<?php print_r($_SESSION["HistoryOfCalculations"]); ?>
+	</pre>
+
+Notes:
+- print_r() prints a nice text representation of a PHP object, in this case an array.
+- Why did I add <pre></pre> ?
+To see why, try removing <pre></pre>. print_r() uses new lines and whitespace to nicely format the text representation of the array, but HTML normally ignores a lot of the whitespace.  <pre> tells HTML to preserve the whitespace formatting.  It stands for "pre-formatted text".
+
+
+
+calculator_04c.php - History of Calculations pt3
+------------------
+
+Now, there remains a problem with our History.  Even though we are pushing to the array, it only remembers the latest calculation.
+
+What is happening: the array is being over-written to an empty array, every time the page reloads:
+	$_SESSION["HistoryOfCalculations"] = array();
+This line is needed to run the very first time, because otherwise, $_SESSION["HistoryOfCalculations"] is not defined, and the array_push will error:
+	array_push($_SESSION["HistoryOfCalculations"], $calculation_text);
+
+So, we need to make sure the line runs *only* the very first time:
+	if( isset($_SESSION["HistoryOfCalculations"]) == FALSE ) {
+	    $_SESSION["HistoryOfCalculations"] = array();
+	}
+The above achieves this because initially, $_SESSION["HistoryOfCalculations"] is not set.
+Once $_SESSION["HistoryOfCalculations"] = array(); has been run, $_SESSION["HistoryOfCalculations"] is set.
+So now, we are initializing to an empty array *only* the first time, and not over-writing history later on.
+
+
+
+calculator_04d.php - History of Calculations pt4 -- polish the look
+------------------
+
+Finally, even if it's function, using print_r() along with <pre>...</pre> gives an output that's a little rough on the eyes.  We can do better, using an HTML unordered list.  Try it in static HTML first, with fake history data:
+
+<ul>
+    <li>2 + 3 = 5</li>
+    <li>2 x 3 = 6</li>
+    <li>20 - 36 = 16</li>
+</ul>
+
+
+Now, try it with your actual history data.  You will need some kind of a loop through the array to create the <li>...</li> elements.  Hint: use foreach()
+
+Lastly, at the end, I removed the now redundant outputs, such as print_r(...)

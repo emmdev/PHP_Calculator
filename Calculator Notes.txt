@@ -1,0 +1,152 @@
+calculator_01.php - a form that submits to itself!
+-----------------
+
+Observations:
+1. Notice that the inputs have names, <input type="text" name="name1" ... >, and this is how we refer to the corresponding PHP variable inside the $_POST array:
+	$_POST['number1']
+
+2. Notice that the numbers are blank when you submit the form, i.e. they don't "remember" the previous entry
+3. Notice that the form submits to itself:
+	<form action="calculator_01.php" ...
+4. Notice, that if the user loads the page without a form submission, $_POST['number1'] and $_POST['number2'] don't even exist, and you will get errors.  That is why we need to process the form data ONLY if the form was submitted.
+This is accomplised with:
+	if ( $form_has_been_submitted ) { ...
+
+5. How can we tell that a form has been submitted?
+
+
+Answer:
+
+Notice that the form uses method="POST".  Normally, when you don't submit a form and do a simple page load, it is the GET method.
+So we can tell if a form has been submitted, by:
+	$form_has_been_submitted = $_SERVER['REQUEST_METHOD'] == 'POST';
+
+
+
+calculator_02.php - making the last numbers entered *persist*
+-----------------
+
+How can we solve the problem that the numbers are blank when you submit the form???
+
+Well, we can get the numbers from the form submission (in PHP, from $_POST["number1"] and $_POST["number2"], and echo them back into the form.  Forms allow you to fill a default "auto-fill" value for an input, for example, if we fill it to 123:
+	<input type="text" name="number1" value="123" ... >
+
+But, instead of "123" as the "auto-fill" value, we want the last number you entered, which we can get in PHP as:
+	$number1 = $_POST['number1']; // number1 from the form
+and auto-fill back into the form:
+	<input type="text" name="number1" value="<?php echo $number1 ?>">
+
+Finally, if the user loaded the page without a form submission, $number1 and $number2 will be undefined, and you will get an Error!
+
+So you need default values for in case there was no form submission:
+$number1 = 0;
+$number2 = 0;
+
+
+calculator_02b.php - slight improvement #1
+------------------
+
+Observations:
+1. Notice that in calculator_02.php, the form action points to itself:
+	<form action="calculator_02.php" ...>
+But, because it is hardcoded to "calculator_02.php", if you renamed the file, it would break...  And you might never know it happened, because your calculator may still (sort of) work.
+
+To prevent this, use the special PHP variable to refer to the same filename that it is running inside:
+	$_SERVER['PHP_SELF']
+
+
+calculator_02c.php - slight improvement #2
+------------------
+
+Observations:
+1. Notice how much we use:
+	<?php echo $variable ?>
+Because this is so common, we can take advantage of a short cut to make our HTML+PHP less cluttered easier to read:
+	<?= $variable ?>
+
+
+
+Controller / View separation
+----------------------------
+
+Before moving on, note how, I mostly have the PHP and HTML in separate sections.  At the top, and bottom, respectively.
+
+This keeps the HTML uncluttered of PHP, so it's easier to see what the page *Looks* like.  We call this section the "View".
+
+This keeps the PHP uncluttered of HTML, so it's easier to see how the backend logic *Behaves*.  We call this section the "Controller".
+
+If you have not had this separation, I strongly encourage you to do so.  It will make your code easier to improve and debug going forward, especially as the code gets more and more complicated.
+
+
+To achieve this, in the HTML section, I have used the smallest bits of PHP, just echo'ing variables, e.g.
+	... <p><?= $answer ?></p> ...
+
+The complicated logic is done above, with the result stored in a variable (e.g. $answer) to be echo'd below.  So, move any complicated PHP expressions and logic to *before* your HTML ...carefully, testing at every step...  And use a variable to echo the final result in the HTML, below.
+
+
+
+calculator_03.php - Handling +, -, ×, ÷
+-----------------
+
+Notice that previously, the + button was an input of type="submit":
+	<input type="submit" value="+">
+
+We can make multiple submit buttons for each operation... but how can we tell which one was clicked from PHP?
+Here's the answer:
+https://stackoverflow.com/questions/11929471/how-do-i-use-two-submit-buttons-and-differentiate-between-which-one-was-used-to
+
+So, they gave each submit button a name="" property, and tested in page which name was defined in the $_POST array:
+        <input type="submit" name="add" value="+">
+        <input type="submit" name="sub" value="-">
+        <input type="submit" name="mul" value="&times;">
+        <input type="submit" name="div" value="&divide;">
+
+And then test, in an if-statement, if "add" was clicked:
+	if( isset($_POST['add']) ) {
+	...
+else, if "sub" was clicked:
+	} else if( isset($_POST['sub']) ) {
+	...
+etc.
+
+
+Notice, I am still keeping Controller (PHP) and View (HTML) code as separate as possible!!
+This organization keeps things readable, and is crucial as the app gets more an more complicated!
+
+Also notice: I'm using plenty of white-space in the if / if else statement, to make it more readable.
+
+
+
+calculator_03b.php - input validation
+------------------
+
+Notice:
+1. What happens if you enter non-numbers and try to calculate??
+2. What happens if you divide any number by 0 ??
+
+You can solve these problems with input validation.  It's possible to do this in HTML / Javascript, but for security reasons, PHP is where it must be done.  (As the user could always get around any HTML / Javascript mechanisms, i.e. using Inspect)
+
+
+To solve the first problem, we can always convert ("cast") the number1 and number2 inputs to numbers:
+    $number1 = (float)$number1;
+    $number2 = (float)$number2;
+
+note:
+a. Form inputs are string values by default, so this converts to a number, always.
+
+b. (float)$number1 means, "interpet the value $number1 as a float number"
+	What happens if you put a non-number, e.g. "Justin" ?
+	Answer: (float)"Justin" interpets "Justin" as 0.
+
+c. We chose float, and not int, because we want to handle numbers with decimals as well
+
+
+To solve the second problem, dividing by 0 is mathematically undefined.  So we can have special case using an if statement, inside division, to check if number2 is 0:
+        if( $number2 == 0 ) {
+            $answer = "Not defined!"; // dividing by 0 is mathematically undefined!
+        } else {
+            $answer = $number1 / $number2; // do the division, store into $answer
+        }
+
+
+

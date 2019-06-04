@@ -1,0 +1,83 @@
+
+calculator_04e.php - more tweaks before moving to MySQL
+------------------
+
+I fixed a minor "bug" ... I forgot " = $answer" in my History of Calculations!
+
+
+
+I added a bit of style to "History of Calculations" <h2>, using:
+
+<head>
+    <style>
+    h2 {
+        font-family: cursive;
+    }
+    </style>
+</head>
+
+
+
+Needless to say, we now have HTML, PHP, and CSS all going on... We are about to add MySQL.  And, in a full app, you will likely have some JavaScript as well... it's getting complicated.
+And we are only just getting started with the features we want to have here.
+
+This is why I'm really really emphasizing taking the time to keep your code organized, such as by having your code separated into View/HTML and Controller/PHP.  Take your time now to make sure any changes you've added still follow this separation.
+
+
+
+calculator_04f.php - Lastly, add a "Clear History" feature!
+------------------
+
+
+... how, and where do you add it to your HTML/View and PHP/Controller code??
+
+
+
+Well, I added a new form just for the "Clear" button:
+    <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST">
+        <input type="submit" name="clear_history" value="clear">
+    </form>
+
+And, in PHP, I checked if $_POST["clear_history"] is set, and then cleared the array!
+    // if the user clicks "Clear" input
+    if( isset($_POST['clear_history']) ) {
+        $_SESSION["HistoryOfCalculations"] = array();
+    }
+
+However!  I introduced a new problem... when I clear the array, I get errors:
+Undefined index: number1 ...
+Undefined index: number2 ...
+
+Upon looking deeper, it was because when you click "Clear", it submits a form using POST, so
+	$form_has_been_submitted = $_SERVER['REQUEST_METHOD'] == 'POST';
+is true... it will be true for either of the form submissions.
+
+However, the form with only the "Clear" button does NOT define number1 and number2... so we get errors.
+
+So, I changed $form_has_been_submitted to only be true if the original calculator form was submitted:
+	$form_has_been_submitted = isset($_POST['number1']);
+
+
+Finally!!  Another tip on keeping your code clean and readable -- group related lines of code together.
+
+
+For example, I have, next to one another:
+
+    // if we have no prior History, initialize History to an empty array
+    if( isset($_SESSION["HistoryOfCalculations"]) == FALSE ) {
+        $_SESSION["HistoryOfCalculations"] = array();
+    }
+    
+    // if the user clicks "Clear" input
+    if( isset($_POST['clear_history']) ) {
+        $_SESSION["HistoryOfCalculations"] = array();
+    }
+
+because these both have to do with "clearing the history".
+
+
+And right above this, I have:
+    session_start();
+
+because this is somewhat related... it initializes the PHP session, which enables our history.
+
