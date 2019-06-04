@@ -34,13 +34,9 @@ function HistoryOfCalculations_GetAll() {
     $result = $conn->query($sql);
 
     $final_array = array();
-    if ($result->num_rows > 0) {
-        // output data of each row
-        while($row = $result->fetch_assoc()) {
-            array_push($final_array, $row["calculation_text"]);
-        }
-    } else {
-        echo "0 results";
+    
+    while($row = $result->fetch_assoc()) {
+        array_push($final_array, $row["calculation_text"]);
     }
     
     return $final_array;
@@ -62,7 +58,7 @@ function CalcDB_Close() {
 
 CalcDB_Connect();
 
-HistoryOfCalculations_AddLine("5 x 2 = 10");
+//HistoryOfCalculations_AddLine("5 x 2 = 10");
 
 echo "<pre>";
 print_r(HistoryOfCalculations_GetAll());
