@@ -28,7 +28,19 @@ function HistoryOfCalculations_AddLine($line) {
 }
 
 function HistoryOfCalculations_GetAll() {
-    return $_SESSION["HistoryOfCalculations"];
+    global $conn;
+    
+    $sql = "SELECT id, calculation_text FROM history_of_calculations";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        // output data of each row
+        while($row = $result->fetch_assoc()) {
+            echo "id: " . $row["id"]. " - Text: " . $row["calculation_text"] . "<br>";
+        }
+    } else {
+        echo "0 results";
+    }
 }
 
 function HistoryOfCalculations_ClearAll() {
@@ -48,6 +60,10 @@ function CalcDB_Close() {
 CalcDB_Connect();
 
 HistoryOfCalculations_AddLine("5 x 2 = 10");
+
+echo "<pre>";
+print_r(HistoryOfCalculations_GetAll());
+echo "</pre>";
 
 CalcDB_Close();
 
