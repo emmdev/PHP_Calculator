@@ -17,7 +17,14 @@ function CalcDB_Connect() {
 }
 
 function HistoryOfCalculations_AddLine($line) {
-    array_push($_SESSION["HistoryOfCalculations"], $line);
+    global $conn;
+    
+    $sql = "INSERT INTO history_of_calculations (calculation_text)
+    VALUES ('$line')";
+
+    if ($conn->query($sql) === FALSE) {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
 }
 
 function HistoryOfCalculations_GetAll() {
@@ -39,6 +46,8 @@ function CalcDB_Close() {
 //------------------------------------
 
 CalcDB_Connect();
+
+HistoryOfCalculations_AddLine("5 x 2 = 10");
 
 CalcDB_Close();
 
