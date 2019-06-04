@@ -10,6 +10,10 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 } 
 
+//----------------------------
+echo "<hr />";
+
+
 // Create database
 $sql = "CREATE DATABASE calc_db";
 if ($conn->query($sql) === TRUE) {
@@ -17,6 +21,10 @@ if ($conn->query($sql) === TRUE) {
 } else {
     echo "Error creating database: " . $conn->error;
 }
+
+//----------------------------
+echo "<hr />";
+
 
 $conn->close();
 
@@ -34,6 +42,10 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 } 
 
+//----------------------------
+echo "<hr />";
+
+
 // sql to create table
 $sql = "CREATE TABLE history_of_calculations (
     id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
@@ -45,6 +57,10 @@ if ($conn->query($sql) === TRUE) {
 } else {
     echo "Error creating table: " . $conn->error;
 }
+
+//----------------------------
+echo "<hr />";
+
 
 $conn->close();
 ?>
