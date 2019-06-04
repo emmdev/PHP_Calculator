@@ -33,14 +33,17 @@ function HistoryOfCalculations_GetAll() {
     $sql = "SELECT id, calculation_text FROM history_of_calculations";
     $result = $conn->query($sql);
 
+    $final_array = array();
     if ($result->num_rows > 0) {
         // output data of each row
         while($row = $result->fetch_assoc()) {
-            echo "id: " . $row["id"]. " - Text: " . $row["calculation_text"] . "<br>";
+            array_push($final_array, $row["calculation_text"]);
         }
     } else {
         echo "0 results";
     }
+    
+    return $final_array;
 }
 
 function HistoryOfCalculations_ClearAll() {
