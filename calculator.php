@@ -35,7 +35,7 @@ include("calculator_controller.php");
     </form>
     <ul>
         <?php
-        foreach(HistoryOfCalculations_GetAll() as $line) {
+        foreach($history_of_calculations_array as $line) {
             echo "<li>$line</li>";
         }
         ?>
