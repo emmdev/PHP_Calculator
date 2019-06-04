@@ -21,3 +21,30 @@ if ($conn->query($sql) === TRUE) {
 $conn->close();
 
 ?>
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "calc_db";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+} 
+
+// sql to create table
+$sql = "CREATE TABLE history_of_calculations (
+    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
+    calculation_text VARCHAR(30) NOT NULL
+)";
+
+if ($conn->query($sql) === TRUE) {
+    echo "Table history_of_calculations created successfully";
+} else {
+    echo "Error creating table: " . $conn->error;
+}
+
+$conn->close();
+?>
