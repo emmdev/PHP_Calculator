@@ -43,7 +43,13 @@ function HistoryOfCalculations_GetAll() {
 }
 
 function HistoryOfCalculations_ClearAll() {
-    $_SESSION["HistoryOfCalculations"] = array();
+    global $conn;
+    
+    $sql = "TRUNCATE TABLE history_of_calculations";
+
+    if ($conn->query($sql) === FALSE) {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
 }
 
 function CalcDB_Close() {
@@ -58,7 +64,9 @@ function CalcDB_Close() {
 
 CalcDB_Connect();
 
-//HistoryOfCalculations_AddLine("5 x 2 = 10");
+HistoryOfCalculations_AddLine("5 x 2 = 10");
+
+HistoryOfCalculations_ClearAll();
 
 echo "<pre>";
 print_r(HistoryOfCalculations_GetAll());
