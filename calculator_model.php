@@ -61,7 +61,7 @@ function CalcDB_Close() {
 
 // Unit testing of our model functions
 //------------------------------------
-
+/*
 CalcDB_Connect();
 
 HistoryOfCalculations_AddLine("5 x 2 = 10");
@@ -73,6 +73,6 @@ print_r(HistoryOfCalculations_GetAll());
 echo "</pre>";
 
 CalcDB_Close();
-
+*/
 
 ?>
