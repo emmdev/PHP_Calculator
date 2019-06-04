@@ -1,6 +1,8 @@
 <?php
 
 function CalcDB_Connect() {
+    global $conn;
+    
     $servername = "localhost";
     $username = "root";
     $password = "";
@@ -27,6 +29,8 @@ function HistoryOfCalculations_ClearAll() {
 }
 
 function CalcDB_Close() {
+    global $conn;
+    
     $conn->close();
 }
 
