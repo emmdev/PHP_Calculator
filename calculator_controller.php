@@ -19,18 +19,13 @@ if( isset($_POST['clear_history']) ) {
 $form_has_been_submitted = isset($_POST['number1']);
 
 // defaults, in case the form has not been submitted
-$number1 = "";
-$answer = 0;
-$calculation_text = "";
+$message_text = "";
 
 // only process form variables if the form was submitted... avoids errors
 if( $form_has_been_submitted ) {
-    $number1 = $_POST['number1'];
+    $message_text = $_POST['number1'];
     
-    $answer = $number1;
-    $calculation_text = $number1;
-    
-    HistoryOfCalculations_AddLine($calculation_text);
+    HistoryOfCalculations_AddLine($message_text);
 }
 
 
