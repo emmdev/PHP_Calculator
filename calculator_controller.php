@@ -30,47 +30,12 @@ if( $form_has_been_submitted ) {
     $number2 = $_POST['number2'];
     
     // handle non-numeric inputs from our form, avoids errors
-    $number1 = (float)$number1;
+    //$number1 = (float)$number1;
     $number2 = (float)$number2;
     
-    // check which submit was clicked
-    if( isset($_POST['add']) ) {
-        // add was clicked
-        
-        $answer = $number1 + $number2;
-        
-        $calculation_text = "$number1 + $number2 = $answer";
-        
-    } else if( isset($_POST['sub']) ) {
-        // sub was clicked
-        
-        $answer = $number1 - $number2;
-        
-        $calculation_text = "$number1 - $number2 = $answer";
-        
-    } else if( isset($_POST['mul']) ) {
-        // mul was clicked
-        
-        $answer = $number1 * $number2;
-        
-        $calculation_text = "$number1 &times $number2 = $answer";
-        
-    } else if( isset($_POST['div']) ) {
-        // div was clicked
-        
-        if( $number2 == 0 ) {
-            // dividing by 0 is mathematically undefined!
-            $answer = "Not defined!";
-            
-            $calculation_text = "Not defined!";
-        } else {
-            $answer = $number1 / $number2;
-            
-            $calculation_text = "$number1 &divide $number2 = $answer";
-        }
-        
-    }
     
+    $answer = $number1;
+    $calculation_text = $number1;
     
     HistoryOfCalculations_AddLine($calculation_text);
 }
