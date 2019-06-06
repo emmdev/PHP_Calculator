@@ -26,7 +26,7 @@ include("calculator_controller.php");
         ?>
     </ul>
     
-    <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST">
+    <form action="process_forms.php" method="POST">
         <input type="text" name="message_text" value="">
         
         <input type="submit" name="add" value="+">
@@ -35,7 +35,7 @@ include("calculator_controller.php");
     
     <br />
 
-    <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST">
+    <form action="process_forms.php" method="POST">
         <input type="submit" name="clear_history" value="clear">
     </form>
 </body>
