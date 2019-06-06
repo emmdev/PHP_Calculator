@@ -13,6 +13,12 @@ include("calculator_controller.php");
         font-family: cursive;
     }
 	</style>
+    <script>
+    // Reload the page every 2 seconds, to get any new messages from the server
+    setTimeout(function() {
+        location.reload(false);
+    }, 2000);
+    </script>
 </head>
 <body>
 
