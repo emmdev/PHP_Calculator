@@ -1,7 +1,7 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
+
+include('mysql_credentials.php');
+
 
 // Create connection
 $conn = new mysqli($servername, $username, $password);
@@ -30,10 +30,6 @@ $conn->close();
 
 ?>
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "calc_db";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);

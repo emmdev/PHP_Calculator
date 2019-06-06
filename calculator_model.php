@@ -3,10 +3,7 @@
 function CalcDB_Connect() {
     global $conn;
     
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "calc_db";
+    include('mysql_credentials.php');
 
     // Create connection
     $conn = new mysqli($servername, $username, $password, $dbname);
