@@ -19,12 +19,14 @@ function CalcDB_Connect() {
 function HistoryOfCalculations_AddLine($line) {
     global $conn;
     
-    $sql = "INSERT INTO history_of_calculations (calculation_text)
-    VALUES ('$line')";
-
-    if ($conn->query($sql) === FALSE) {
-        echo "Error: " . $sql . "<br>" . $conn->error;
-    }
+    $stmt = $conn->prepare("INSERT INTO history_of_calculations (calculation_text)
+    VALUES (?)");
+    
+    $stmt->bind_param("s", $line);
+    //$line = $line;  /// redudant
+    $stmt->execute();
+    
+    $stmt->close();
 }
 
 function HistoryOfCalculations_GetAll() {
